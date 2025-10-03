@@ -1,6 +1,6 @@
 /**
- * Step Generator - Milestone 3
- * Generates step events based on archetype and time
+ * Step Generator - Milestone 3 & 4
+ * Generates step events based on archetype, time, and device state
  */
 
 import {
@@ -11,6 +11,7 @@ import {
   ACTIVITY_MULTIPLIERS,
 } from './archetypes';
 import { TimerEvent } from '../timer/types';
+import { DeviceState } from '../state/types';
 
 export interface StepData {
   steps: number;
@@ -19,6 +20,8 @@ export interface StepData {
   stepsThisHour: number;
   activityType: 'walking' | 'jogging';
   activityLevel: string;
+  deviceState?: DeviceState; // Added for Milestone 4
+  stateMultiplier?: number; // Added for Milestone 4
 }
 
 export class StepGenerator {
@@ -57,10 +60,15 @@ export class StepGenerator {
   }
 
   /**
-   * Calculate steps for the current time
+   * Calculate steps for the current time (with optional state modulation)
    * Returns number of steps generated since last call
    */
-  calculateSteps(currentTime: Date, deltaSeconds: number): StepData | null {
+  calculateSteps(
+    currentTime: Date,
+    deltaSeconds: number,
+    stateMultiplier: number = 1.0,
+    deviceState?: DeviceState
+  ): StepData | null {
     const hour = currentTime.getHours();
     const minute = currentTime.getMinutes();
     const second = currentTime.getSeconds();
@@ -90,7 +98,9 @@ export class StepGenerator {
     // Calculate steps based on activity
     const baseStepsPerSecond = STEP_RATES[activity.type] / 60; // steps per second
     const activityMultiplier = ACTIVITY_MULTIPLIERS[activity.level];
-    const stepsPerSecond = baseStepsPerSecond * activityMultiplier;
+
+    // Apply state multiplier (Milestone 4)
+    const stepsPerSecond = baseStepsPerSecond * activityMultiplier * stateMultiplier;
 
     // Accumulate fractional steps
     this.accumulatedSteps += stepsPerSecond * deltaSeconds;
@@ -111,6 +121,8 @@ export class StepGenerator {
         stepsThisHour: this.stepsThisHour,
         activityType: activity.type,
         activityLevel: activity.level,
+        deviceState,
+        stateMultiplier,
       };
     }
 

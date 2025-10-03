@@ -17,9 +17,12 @@ export default function Dashboard() {
           <h1 className="text-4xl font-bold text-white mb-2">
             Watch Simulator Dashboard
           </h1>
+          <p className="text-slate-400 text-sm">
+            Phase 1: Timer & Sensor Modules | Supports x1 to x1000 playback speed
+          </p>
         </header>
 
-        {/* Main Layout */}
+        {/* Main Layout - 3 Panel Grid */}
         <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
           {/* Left Column: Visualization (A) + Controls (B) */}
           <div className="xl:col-span-2 space-y-6">

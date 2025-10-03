@@ -18,6 +18,11 @@ export interface TimerState {
   progress: number; // 0-100
   currentTime: RTCTime | null;
   events: LogEvent[];
+  // Step tracking for charts
+  hourlySteps: number[]; // 168 hours (7 days)
+  dailySteps: number[]; // 365 days (1 year)
+  currentHourIndex: number;
+  currentDayIndex: number;
 }
 
 const initialState: TimerState = {
@@ -29,6 +34,10 @@ const initialState: TimerState = {
   progress: 0,
   currentTime: null,
   events: [],
+  hourlySteps: Array(168).fill(0),
+  dailySteps: Array(365).fill(0),
+  currentHourIndex: 0,
+  currentDayIndex: 0,
 };
 
 export const timerSlice = createSlice({
@@ -47,6 +56,10 @@ export const timerSlice = createSlice({
       state.progress = 0;
       state.currentTime = null;
       state.events = [];
+      state.hourlySteps = Array(168).fill(0);
+      state.dailySteps = Array(365).fill(0);
+      state.currentHourIndex = 0;
+      state.currentDayIndex = 0;
     },
     setSpeed: (state, action: PayloadAction<number>) => {
       state.speed = action.payload;
@@ -80,6 +93,18 @@ export const timerSlice = createSlice({
     clearEvents: (state) => {
       state.events = [];
     },
+    addStepsToHour: (state, action: PayloadAction<{ hourIndex: number; steps: number }>) => {
+      const { hourIndex, steps } = action.payload;
+      if (hourIndex >= 0 && hourIndex < 168) {
+        state.hourlySteps[hourIndex] += steps;
+      }
+    },
+    addStepsToDay: (state, action: PayloadAction<{ dayIndex: number; steps: number }>) => {
+      const { dayIndex, steps } = action.payload;
+      if (dayIndex >= 0 && dayIndex < 365) {
+        state.dailySteps[dayIndex] += steps;
+      }
+    },
   },
 });
 
@@ -95,6 +120,8 @@ export const {
   updateCurrentTime,
   addEvent,
   clearEvents,
+  addStepsToHour,
+  addStepsToDay,
 } = timerSlice.actions;
 
 export default timerSlice.reducer;
