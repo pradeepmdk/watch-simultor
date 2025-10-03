@@ -137,12 +137,16 @@ export function useTimer() {
 
             // If state changed, emit NEW_STATE event
             if (stateTransition) {
+              const serializedTransition = {
+                ...stateTransition,
+                timestamp: stateTransition.timestamp.toISOString(),
+              };
               dispatch(
                 addEvent({
                   timestamp: currentTime.toISOString(),
                   type: 'NEW_STATE',
                   message: `State: ${stateTransition.from} → ${stateTransition.to} (${stateTransition.reason})`,
-                  data: stateTransition,
+                  data: serializedTransition,
                 })
               );
             }
