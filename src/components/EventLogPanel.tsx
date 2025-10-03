@@ -36,7 +36,7 @@ export function EventLogPanel() {
     : events.filter(event => event.type === filter);
 
   return (
-    <div className="bg-slate-800/50 backdrop-blur-sm rounded-2xl border border-slate-700/50 p-6 shadow-2xl h-full flex flex-col">
+    <div className="bg-slate-800/50 backdrop-blur-sm rounded-2xl border border-slate-700/50 p-6 shadow-2xl h-full max-h-[calc(100vh-180px)] flex flex-col">
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
           <div className="w-1 h-8 bg-gradient-to-b from-purple-500 to-pink-500 rounded-full"></div>
@@ -77,7 +77,7 @@ export function EventLogPanel() {
       {/* Event List */}
       <div
         ref={scrollRef}
-        className="flex-1 overflow-y-auto space-y-2 scrollbar-thin scrollbar-thumb-slate-600 scrollbar-track-slate-800/50 min-h-[400px]"
+        className="flex-1 overflow-y-auto space-y-2 scrollbar-thin scrollbar-thumb-slate-600 scrollbar-track-slate-800/50"
       >
         {filteredEvents.length === 0 ? (
           <div className="flex items-center justify-center h-full text-slate-500">

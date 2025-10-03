@@ -8,6 +8,7 @@ import {
   setStartDate as setStartDateAction,
   setDuration as setDurationAction,
   setArchetype as setArchetypeAction,
+  addEvent,
 } from 'energy/lib/features/timerSlice';
 
 export function ControlPanel() {
@@ -24,11 +25,30 @@ export function ControlPanel() {
 
   const handleStart = () => {
     dispatch(startTimer());
+    dispatch(
+      addEvent({
+        timestamp: new Date().toISOString(),
+        type: 'NEW_STATE',
+        message: `Simulation started at speed x${speed}`,
+        data: { action: 'start', speed },
+      })
+    );
   };
 
   const handlePause = () => {
     dispatch(pauseTimer());
+    dispatch(
+      addEvent({
+        timestamp: new Date().toISOString(),
+        type: 'NEW_STATE',
+        message: `Simulation paused at speed x${speed}`,
+        data: { action: 'pause', speed },
+      })
+    );
   };
+
+  const safeProgress = Number.isFinite(progress) ? Math.min(Math.max(progress, 0), 100) : 0;
+  const progressLabel = `${safeProgress.toFixed(2)}%`;
 
   const handleSaveJSON = () => {
     const data = {
@@ -179,12 +199,12 @@ export function ControlPanel() {
         <div className="pt-2">
           <div className="flex justify-between text-sm text-slate-400 mb-2">
             <span>Progress</span>
-            <span className="font-mono">{progress}%</span>
+            <span className="font-mono">{progressLabel}</span>
           </div>
           <div className="h-3 bg-slate-700 rounded-full overflow-hidden">
             <div
               className="h-full bg-gradient-to-r from-blue-500 to-purple-500 transition-all duration-300 rounded-full"
-              style={{ width: `${progress}%` }}
+              style={{ width: `${safeProgress}%` }}
             />
           </div>
         </div>
