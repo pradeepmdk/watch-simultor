@@ -1,46 +1,8 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-
-interface LogEvent {
-  id: string;
-  timestamp: string;
-  type: 'NEW_SECOND' | 'NEW_MINUTE' | 'NEW_STEP' | 'NEW_STATE';
-  message: string;
-  data?: any;
-}
-
-// Mock events for demonstration
-const mockEvents: LogEvent[] = [
-  {
-    id: '1',
-    timestamp: '2024-03-20 14:23:45',
-    type: 'NEW_SECOND',
-    message: 'Timer tick',
-    data: { second: 45 }
-  },
-  {
-    id: '2',
-    timestamp: '2024-03-20 14:24:00',
-    type: 'NEW_MINUTE',
-    message: 'Minute changed',
-    data: { minute: 24 }
-  },
-  {
-    id: '3',
-    timestamp: '2024-03-20 14:24:15',
-    type: 'NEW_STEP',
-    message: 'Step detected',
-    data: { steps: 150 }
-  },
-  {
-    id: '4',
-    timestamp: '2024-03-20 14:24:30',
-    type: 'NEW_STATE',
-    message: 'State changed to ACTIVE',
-    data: { state: 'ACTIVE' }
-  },
-];
+import { useAppDispatch, useAppSelector } from 'energy/lib/hooks';
+import { clearEvents } from 'energy/lib/features/timerSlice';
 
 const eventTypeColors = {
   NEW_SECOND: 'bg-blue-500/20 text-blue-400 border-blue-500/30',
@@ -57,7 +19,8 @@ const eventTypeIcons = {
 };
 
 export function EventLogPanel() {
-  const [events, setEvents] = useState<LogEvent[]>(mockEvents);
+  const dispatch = useAppDispatch();
+  const events = useAppSelector((state) => state.timer.events);
   const [filter, setFilter] = useState<string>('all');
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -156,7 +119,7 @@ export function EventLogPanel() {
 
       {/* Clear Button */}
       <button
-        onClick={() => setEvents([])}
+        onClick={() => dispatch(clearEvents())}
         className="w-full mt-4 bg-slate-700/30 hover:bg-red-500/20 border border-slate-600 hover:border-red-500/50 text-slate-400 hover:text-red-400 font-medium py-2 px-4 rounded-lg transition-all duration-200 flex items-center justify-center gap-2"
       >
         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

@@ -1,27 +1,49 @@
 'use client';
 
-import { useState } from 'react';
+import { useAppDispatch, useAppSelector } from 'energy/lib/hooks';
+import {
+  startTimer,
+  pauseTimer,
+  setSpeed as setSpeedAction,
+  setStartDate as setStartDateAction,
+  setDuration as setDurationAction,
+  setArchetype as setArchetypeAction,
+} from 'energy/lib/features/timerSlice';
 
 export function ControlPanel() {
-  const [speed, setSpeed] = useState(1);
-  const [startDate, setStartDate] = useState('');
-  const [duration, setDuration] = useState(7);
-  const [archetype, setArchetype] = useState('office');
-  const [isRunning, setIsRunning] = useState(false);
-  const [progress, setProgress] = useState(0);
+  const dispatch = useAppDispatch();
+  const {
+    isRunning,
+    speed,
+    startDate,
+    duration,
+    archetype,
+    progress,
+    currentTime,
+  } = useAppSelector((state) => state.timer);
 
   const handleStart = () => {
-    setIsRunning(true);
-    // Simulation logic will be implemented in later milestones
+    dispatch(startTimer());
   };
 
   const handlePause = () => {
-    setIsRunning(false);
+    dispatch(pauseTimer());
   };
 
   const handleSaveJSON = () => {
-    // Save simulation data logic
-    console.log('Saving to JSON...');
+    const data = {
+      config: { speed, startDate, duration, archetype },
+      currentTime,
+      progress,
+    };
+    const json = JSON.stringify(data, null, 2);
+    const blob = new Blob([json], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `simulation-${new Date().toISOString()}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
   };
 
   return (
@@ -32,6 +54,23 @@ export function ControlPanel() {
       </div>
 
       <div className="space-y-6">
+        {/* RTC Display */}
+        {currentTime && (
+          <div className="bg-slate-900/50 border border-slate-700/50 rounded-lg p-4">
+            <div className="text-xs text-slate-400 mb-1">Simulated Time</div>
+            <div className="text-xl font-mono text-blue-400">
+              {String(currentTime.year).padStart(4, '0')}-
+              {String(currentTime.month).padStart(2, '0')}-
+              {String(currentTime.day).padStart(2, '0')} {String(currentTime.hour).padStart(2, '0')}:
+              {String(currentTime.minute).padStart(2, '0')}:
+              {String(currentTime.second).padStart(2, '0')}
+            </div>
+            <div className="text-xs text-slate-500 mt-1">
+              Day of Week: {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][currentTime.dayOfWeek]}
+            </div>
+          </div>
+        )}
+
         {/* Speed Control */}
         <div>
           <label className="block text-sm font-medium text-slate-300 mb-3">
@@ -43,7 +82,7 @@ export function ControlPanel() {
               min="1"
               max="1000"
               value={speed}
-              onChange={(e) => setSpeed(Number(e.target.value))}
+              onChange={(e) => dispatch(setSpeedAction(Number(e.target.value)))}
               className="flex-1 h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-blue-500"
             />
             <span className="text-slate-400 text-sm min-w-[60px] text-right font-mono">
@@ -60,8 +99,9 @@ export function ControlPanel() {
           <input
             type="date"
             value={startDate}
-            onChange={(e) => setStartDate(e.target.value)}
-            className="w-full bg-slate-700/50 border border-slate-600 rounded-lg px-4 py-2.5 text-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+            onChange={(e) => dispatch(setStartDateAction(e.target.value))}
+            disabled={isRunning}
+            className="w-full bg-slate-700/50 border border-slate-600 rounded-lg px-4 py-2.5 text-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all disabled:opacity-50 disabled:cursor-not-allowed"
           />
         </div>
 
@@ -75,8 +115,9 @@ export function ControlPanel() {
             min="1"
             max="30"
             value={duration}
-            onChange={(e) => setDuration(Number(e.target.value))}
-            className="w-full bg-slate-700/50 border border-slate-600 rounded-lg px-4 py-2.5 text-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+            onChange={(e) => dispatch(setDurationAction(Number(e.target.value)))}
+            disabled={isRunning}
+            className="w-full bg-slate-700/50 border border-slate-600 rounded-lg px-4 py-2.5 text-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all disabled:opacity-50 disabled:cursor-not-allowed"
           />
         </div>
 
@@ -87,8 +128,9 @@ export function ControlPanel() {
           </label>
           <select
             value={archetype}
-            onChange={(e) => setArchetype(e.target.value)}
-            className="w-full bg-slate-700/50 border border-slate-600 rounded-lg px-4 py-2.5 text-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all appearance-none cursor-pointer"
+            onChange={(e) => dispatch(setArchetypeAction(e.target.value))}
+            disabled={isRunning}
+            className="w-full bg-slate-700/50 border border-slate-600 rounded-lg px-4 py-2.5 text-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all appearance-none cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <option value="office">Office Worker</option>
             <option value="athlete">Athlete</option>

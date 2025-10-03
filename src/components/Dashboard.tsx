@@ -3,8 +3,12 @@
 import { VisualizationPanel } from './VisualizationPanel';
 import { ControlPanel } from './ControlPanel';
 import { EventLogPanel } from './EventLogPanel';
+import { useTimer } from 'energy/lib/timer/useTimer';
 
 export default function Dashboard() {
+  // Initialize timer engine
+  useTimer();
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 p-6">
       <div className="max-w-[1920px] mx-auto">
