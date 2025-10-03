@@ -5,9 +5,18 @@ import { ComposedChart, Bar, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend,
 import { useAppSelector } from 'energy/lib/hooks';
 
 // Hann window smoothing function
-function hannSmooth(data: number[], windowSize: number): number[] {
+function hannSmooth(data: number[] | undefined, windowSize: number): number[] {
+  if (!Array.isArray(data) || data.length === 0) {
+    return [];
+  }
+
+  if (windowSize <= 1) {
+    return [...data];
+  }
+
   const smoothed: number[] = [];
-  const halfWindow = Math.floor(windowSize / 2);
+  const normalizedWindowSize = Math.max(2, Math.min(windowSize, data.length));
+  const halfWindow = Math.floor(normalizedWindowSize / 2);
   
   for (let i = 0; i < data.length; i++) {
     let sum = 0;
@@ -17,7 +26,7 @@ function hannSmooth(data: number[], windowSize: number): number[] {
       const idx = i + j;
       if (idx >= 0 && idx < data.length) {
         // Hann window weight
-        const weight = 0.5 * (1 - Math.cos(2 * Math.PI * (j + halfWindow) / (windowSize - 1)));
+        const weight = 0.5 * (1 - Math.cos(2 * Math.PI * (j + halfWindow) / (normalizedWindowSize - 1)));
         sum += data[idx] * weight;
         weightSum += weight;
       }
@@ -29,12 +38,19 @@ function hannSmooth(data: number[], windowSize: number): number[] {
   return smoothed;
 }
 
+const EMPTY_HOURLY: number[] = Array(168).fill(0);
+const EMPTY_DAILY: number[] = Array(365).fill(0);
+
 export function VisualizationPanel() {
   const [hourlyWindowSize, setHourlyWindowSize] = useState(7);
   const [dailyWindowSize, setDailyWindowSize] = useState(7);
   
   // Get real step data from Redux
-  const { hourlySteps, dailySteps } = useAppSelector((state) => state.timer);
+  const timerState = useAppSelector((state) => state.timer);
+  const hourlyStepsSource = Array.isArray(timerState?.hourlySteps) ? timerState!.hourlySteps : EMPTY_HOURLY;
+  const dailyStepsSource = Array.isArray(timerState?.dailySteps) ? timerState!.dailySteps : EMPTY_DAILY;
+  const hourlySteps = useMemo(() => [...hourlyStepsSource], [hourlyStepsSource]);
+  const dailySteps = useMemo(() => [...dailyStepsSource], [dailyStepsSource]);
 
   // Prepare hourly chart data (always 168 hours)
   const hourlyChartData = useMemo(() => {
