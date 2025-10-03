@@ -1,5 +1,5 @@
-import Counter from "energy/components/Counter";
+import Dashboard from "energy/components/Dashboard";
 
 export default function Home() {
-  return <Counter />;
+  return <Dashboard />;
 }
