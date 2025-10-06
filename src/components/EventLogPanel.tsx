@@ -35,6 +35,18 @@ export function EventLogPanel() {
     ? events
     : events.filter(event => event.type === filter);
 
+  // Format timestamp to YYYY-MM-DD HH:MM:SS
+  const formatTimestamp = (isoString: string) => {
+    const date = new Date(isoString);
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    const seconds = String(date.getSeconds()).padStart(2, '0');
+    return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+  };
+
   return (
     <div className="bg-slate-800/50 backdrop-blur-sm rounded-2xl border border-slate-700/50 p-4 shadow-2xl h-full flex flex-col overflow-hidden">
       <div className="flex items-center justify-between mb-3 flex-shrink-0">
@@ -101,7 +113,7 @@ export function EventLogPanel() {
                       {eventTypeIcons[event.type]} {event.type}
                     </span>
                     <span className="text-xs text-slate-500 font-mono truncate">
-                      {event.timestamp}
+                      {formatTimestamp(event.timestamp)}
                     </span>
                   </div>
                   <p className="text-xs text-slate-300">{event.message}</p>
