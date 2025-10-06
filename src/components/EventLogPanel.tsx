@@ -22,6 +22,7 @@ export function EventLogPanel() {
   const dispatch = useAppDispatch();
   const events = useAppSelector((state) => state.timer.events);
   const [filter, setFilter] = useState<string>('all');
+  const [maxEvents, setMaxEvents] = useState<number>(100);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -34,6 +35,9 @@ export function EventLogPanel() {
   const filteredEvents = filter === 'all'
     ? events
     : events.filter(event => event.type === filter);
+
+  // Limit events to maxEvents (newest first)
+  const limitedEvents = filteredEvents.slice(-maxEvents);
 
   // Format timestamp to YYYY-MM-DD HH:MM:SS
   const formatTimestamp = (isoString: string) => {
@@ -54,9 +58,21 @@ export function EventLogPanel() {
           <div className="w-1 h-6 bg-gradient-to-b from-purple-500 to-pink-500 rounded-full"></div>
           <h2 className="text-xl font-semibold text-white">Event Log</h2>
         </div>
-        <span className="text-xs text-slate-400 bg-slate-700/50 px-2 py-1 rounded-full">
-          {filteredEvents.length} events
-        </span>
+        <div className="flex items-center gap-2">
+          <span className="text-xs text-slate-400">Max:</span>
+          <select
+            value={maxEvents}
+            onChange={(e) => setMaxEvents(Number(e.target.value))}
+            aria-label="Maximum events to display"
+            className="text-xs bg-slate-700/50 border border-slate-600 rounded px-2 py-1 text-slate-200 focus:outline-none focus:ring-1 focus:ring-purple-500 cursor-pointer"
+          >
+            <option value={100}>100</option>
+            <option value={1000}>1000</option>
+          </select>
+          <span className="text-xs text-slate-400 bg-slate-700/50 px-2 py-1 rounded-full">
+            {limitedEvents.length} events
+          </span>
+        </div>
       </div>
 
       {/* Filter Buttons */}
@@ -86,12 +102,12 @@ export function EventLogPanel() {
         ))}
       </div>
 
-      {/* Event List */}
+      {/* Event List - Compact View */}
       <div
         ref={scrollRef}
-        className="flex-1 overflow-y-auto space-y-1.5 scrollbar-thin scrollbar-thumb-slate-600 scrollbar-track-slate-800/50 pr-1"
+        className="flex-1 overflow-y-auto space-y-0.5 scrollbar-thin scrollbar-thumb-slate-600 scrollbar-track-slate-800/50 pr-1"
       >
-        {filteredEvents.length === 0 ? (
+        {limitedEvents.length === 0 ? (
           <div className="flex items-center justify-center h-full text-slate-500">
             <div className="text-center">
               <div className="text-3xl mb-2">📭</div>
@@ -99,30 +115,22 @@ export function EventLogPanel() {
             </div>
           </div>
         ) : (
-          filteredEvents.map((event) => (
+          limitedEvents.map((event) => (
             <div
               key={event.id}
-              className="bg-slate-900/50 border border-slate-700/50 rounded-lg p-3 hover:border-slate-600 transition-all"
+              className="bg-slate-900/30 border-l-2 hover:bg-slate-900/50 transition-all px-2 py-1 text-xs"
+              style={{ borderLeftColor: event.type === 'NEW_SECOND' ? '#60a5fa' : event.type === 'NEW_MINUTE' ? '#a78bfa' : event.type === 'NEW_STEP' ? '#4ade80' : '#fb923c' }}
             >
-              <div className="flex items-start justify-between gap-2">
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-1.5 mb-1 flex-wrap">
-                    <span className={`px-1.5 py-0.5 rounded text-xs font-medium border ${
-                      eventTypeColors[event.type]
-                    }`}>
-                      {eventTypeIcons[event.type]} {event.type}
-                    </span>
-                    <span className="text-xs text-slate-500 font-mono truncate">
-                      {formatTimestamp(event.timestamp)}
-                    </span>
-                  </div>
-                  <p className="text-xs text-slate-300">{event.message}</p>
-                  {event.data && (
-                    <pre className="mt-1.5 text-xs text-slate-400 bg-slate-800/50 rounded px-2 py-1 font-mono overflow-x-auto">
-                      {JSON.stringify(event.data, null, 2)}
-                    </pre>
-                  )}
-                </div>
+              <div className="flex items-center gap-2">
+                <span className={`px-1.5 py-0.5 rounded font-medium border flex-shrink-0 ${
+                  eventTypeColors[event.type]
+                }`}>
+                  {eventTypeIcons[event.type]}
+                </span>
+                <span className="text-slate-500 font-mono flex-shrink-0">
+                  {formatTimestamp(event.timestamp)}
+                </span>
+                <span className="text-slate-300 truncate flex-1">{event.message}</span>
               </div>
             </div>
           ))
