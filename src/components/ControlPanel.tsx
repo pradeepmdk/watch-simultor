@@ -8,6 +8,7 @@ import {
   setStartDate as setStartDateAction,
   setDuration as setDurationAction,
   setArchetype as setArchetypeAction,
+  setExportFilename,
   addEvent,
 } from 'energy/lib/features/timerSlice';
 
@@ -21,9 +22,20 @@ export function ControlPanel() {
     archetype,
     progress,
     currentTime,
+    minuteSteps,
+    exportFilename,
   } = useAppSelector((state) => state.timer);
 
   const handleStart = () => {
+    // Auto-generate filename when starting
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    const uuid = Math.random().toString(36).substring(2, 6).toUpperCase();
+    const filename = `${year}-${month}-${day}_${speed}x_${uuid}.json`;
+    dispatch(setExportFilename(filename));
+    
     dispatch(startTimer());
     dispatch(
       addEvent({
@@ -49,21 +61,30 @@ export function ControlPanel() {
 
   const safeProgress = Number.isFinite(progress) ? Math.min(Math.max(progress, 0), 100) : 0;
   const progressLabel = `${safeProgress.toFixed(2)}%`;
+  const safeMinuteSteps = minuteSteps || [];
+  const safeExportFilename = exportFilename || 'simulation.json';
 
   const handleSaveJSON = () => {
-    const data = {
-      config: { speed, startDate, duration, archetype },
-      currentTime,
-      progress,
-    };
-    const json = JSON.stringify(data, null, 2);
-    const blob = new Blob([json], { type: 'application/json' });
+    // Format: YYYY-MM-DD HH:MM:SS, N_steps
+    const lines = safeMinuteSteps.map(entry => `${entry.timestamp}, ${entry.steps}`);
+    const content = lines.join('\n');
+    
+    const blob = new Blob([content], { type: 'text/plain' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `simulation-${new Date().toISOString()}.json`;
+    a.download = safeExportFilename;
     a.click();
     URL.revokeObjectURL(url);
+    
+    dispatch(
+      addEvent({
+        timestamp: new Date().toISOString(),
+        type: 'NEW_STATE',
+        message: `Exported ${safeMinuteSteps.length} minutes of step data to ${safeExportFilename}`,
+        data: { filename: safeExportFilename, entries: safeMinuteSteps.length },
+      })
+    );
   };
 
   return (
@@ -167,19 +188,25 @@ export function ControlPanel() {
         )}
       </div>
 
-      {/* Fourth Row: Save Buttons */}
+      {/* Fourth Row: Filename Input and Save Button */}
       <div className="flex items-center gap-2 mb-2">
+        <input
+          type="text"
+          value={safeExportFilename}
+          onChange={(e) => dispatch(setExportFilename(e.target.value))}
+          placeholder="filename.json"
+          className="flex-1 bg-slate-700/50 border border-slate-600 rounded px-2 py-1.5 text-xs text-slate-200 focus:outline-none focus:ring-1 focus:ring-blue-500"
+        />
         <button
           onClick={handleSaveJSON}
-          className="flex-1 bg-slate-700/50 hover:bg-slate-700 border border-slate-600 hover:border-slate-500 text-slate-200 font-medium py-1.5 px-3 rounded transition-all duration-200 flex items-center justify-center gap-1.5 text-xs"
+          disabled={safeMinuteSteps.length === 0}
+          className="bg-blue-600/80 hover:bg-blue-600 border border-blue-500 hover:border-blue-400 text-white font-medium py-1.5 px-3 rounded transition-all duration-200 flex items-center justify-center gap-1.5 text-xs whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed"
+          title={`Download ${safeMinuteSteps.length} minutes of step data`}
         >
-          Save to JSON
-        </button>
-        <button
-          onClick={handleSaveJSON}
-          className="flex-1 bg-slate-700/50 hover:bg-slate-700 border border-slate-600 hover:border-slate-500 text-slate-200 font-medium py-1.5 px-3 rounded transition-all duration-200 flex items-center justify-center gap-1.5 text-xs"
-        >
-          Gen YYYY-MM-DD_xx_UUUU.json
+          <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
+          </svg>
+          Save ({safeMinuteSteps.length})
         </button>
       </div>
 

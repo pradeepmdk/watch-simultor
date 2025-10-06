@@ -10,6 +10,7 @@ import {
   setProgress,
   addStepsToHour,
   addStepsToDay,
+  addMinuteSteps,
 } from '../features/timerSlice';
 import { TimerEngine } from './TimerEngine';
 import { TimerEvent } from './types';
@@ -118,6 +119,19 @@ export function useTimer() {
 
           // Reset minute counter
           if (minute !== lastMinuteRef.current) {
+            // Save minute steps data for JSON export
+            const year = currentTime.getFullYear();
+            const month = String(currentTime.getMonth() + 1).padStart(2, '0');
+            const day = String(currentTime.getDate()).padStart(2, '0');
+            const hourStr = String(hour).padStart(2, '0');
+            const minuteStr = String(minute).padStart(2, '0');
+            const timestamp = `${year}-${month}-${day} ${hourStr}:${minuteStr}:00`;
+            
+            dispatch(addMinuteSteps({
+              timestamp,
+              steps: stepsInLastMinuteRef.current,
+            }));
+
             const archetype = stepGeneratorRef.current.getArchetype();
             const activity = getActivityForHour(archetype, hour);
 

@@ -9,6 +9,11 @@ export interface LogEvent {
   data?: any;
 }
 
+export interface MinuteStepData {
+  timestamp: string; // YYYY-MM-DD HH:MM:00
+  steps: number;
+}
+
 export interface TimerState {
   isRunning: boolean;
   speed: number;
@@ -23,6 +28,10 @@ export interface TimerState {
   dailySteps: number[]; // 365 days (1 year)
   currentHourIndex: number;
   currentDayIndex: number;
+  // Minute-by-minute step tracking for JSON export
+  minuteSteps: MinuteStepData[];
+  // JSON export filename
+  exportFilename: string;
 }
 
 const initialState: TimerState = {
@@ -38,6 +47,8 @@ const initialState: TimerState = {
   dailySteps: Array(365).fill(0),
   currentHourIndex: 0,
   currentDayIndex: 0,
+  minuteSteps: [],
+  exportFilename: 'simulation.json',
 };
 
 export const timerSlice = createSlice({
@@ -60,6 +71,7 @@ export const timerSlice = createSlice({
       state.dailySteps = Array(365).fill(0);
       state.currentHourIndex = 0;
       state.currentDayIndex = 0;
+      state.minuteSteps = [];
     },
     setSpeed: (state, action: PayloadAction<number>) => {
       state.speed = action.payload;
@@ -105,6 +117,12 @@ export const timerSlice = createSlice({
         state.dailySteps[dayIndex] += steps;
       }
     },
+    addMinuteSteps: (state, action: PayloadAction<MinuteStepData>) => {
+      state.minuteSteps.push(action.payload);
+    },
+    setExportFilename: (state, action: PayloadAction<string>) => {
+      state.exportFilename = action.payload;
+    },
   },
 });
 
@@ -122,6 +140,8 @@ export const {
   clearEvents,
   addStepsToHour,
   addStepsToDay,
+  addMinuteSteps,
+  setExportFilename,
 } = timerSlice.actions;
 
 export default timerSlice.reducer;
