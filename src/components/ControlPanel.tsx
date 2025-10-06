@@ -27,6 +27,9 @@ export function ControlPanel() {
     exportFilename,
   } = useAppSelector((state) => state.timer);
 
+  // Convert ISO datetime to date-only format for input
+  const dateInputValue = startDate ? startDate.split('T')[0] : '';
+
   const handleStart = () => {
     // Auto-generate filename when starting
     const now = new Date();
@@ -135,7 +138,7 @@ export function ControlPanel() {
           </label>
           <input
             type="date"
-            value={startDate}
+            value={dateInputValue}
             onChange={(e) => dispatch(setStartDateAction(e.target.value))}
             disabled={isRunning}
             className="flex-1 bg-slate-700/50 border border-slate-600 rounded px-2 py-1 text-xs text-slate-200 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:opacity-50"

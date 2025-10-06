@@ -34,10 +34,21 @@ export interface TimerState {
   exportFilename: string;
 }
 
+// Create initial date at 9:00 AM local time (active hour for testing)
+// We use date string format so it works consistently across timezones
+const getInitialStartDate = (): string => {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, '0');
+  const day = String(now.getDate()).padStart(2, '0');
+  // Return ISO format with 9:00 AM local time
+  return `${year}-${month}-${day}T09:00:00`;
+};
+
 const initialState: TimerState = {
   isRunning: false,
   speed: 1,
-  startDate: new Date().toISOString().split('T')[0],
+  startDate: getInitialStartDate(),
   duration: 7,
   archetype: 'office',
   progress: 0,
@@ -77,7 +88,13 @@ export const timerSlice = createSlice({
       state.speed = action.payload;
     },
     setStartDate: (state, action: PayloadAction<string>) => {
-      state.startDate = action.payload;
+      // If date-only format (YYYY-MM-DD), append 9:00 AM time
+      if (action.payload && action.payload.length === 10 && action.payload.includes('-')) {
+        const date = new Date(action.payload + 'T09:00:00');
+        state.startDate = date.toISOString();
+      } else {
+        state.startDate = action.payload;
+      }
     },
     setDuration: (state, action: PayloadAction<number>) => {
       state.duration = action.payload;
