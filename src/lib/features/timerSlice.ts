@@ -118,6 +118,9 @@ export const timerSlice = createSlice({
       }
     },
     addMinuteSteps: (state, action: PayloadAction<MinuteStepData>) => {
+      if (!state.minuteSteps) {
+        state.minuteSteps = [];
+      }
       state.minuteSteps.push(action.payload);
     },
     setExportFilename: (state, action: PayloadAction<string>) => {

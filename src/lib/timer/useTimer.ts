@@ -28,6 +28,7 @@ export function useTimer() {
   const lastUpdateTimeRef = useRef<number>(0);
   const stepsInLastMinuteRef = useRef<number>(0);
   const lastMinuteRef = useRef<number>(-1);
+  const secondCounterRef = useRef<number>(0);
 
   // Initialize TimerEngine, StepGenerator, and StateMachine
   useEffect(() => {
@@ -95,8 +96,14 @@ export function useTimer() {
         }
       }
 
-      // Add other events to log (but throttle NEW_SECOND to avoid spam)
-      if (event.type !== 'NEW_SECOND') {
+      // Add events to log (throttle NEW_SECOND to avoid spam - log every 10th second)
+      let shouldLogEvent = true;
+      if (event.type === 'NEW_SECOND') {
+        secondCounterRef.current += 1;
+        shouldLogEvent = secondCounterRef.current % 10 === 0;
+      }
+      
+      if (shouldLogEvent) {
         dispatch(
           addEvent({
             timestamp: event.simulatedTime.toISOString(),
