@@ -75,20 +75,20 @@ export function VisualizationPanel() {
     }));
   }, [dailySteps, dailyWindowSize]);
   return (
-    <div className="bg-slate-800/50 backdrop-blur-sm rounded-2xl border border-slate-700/50 p-6 shadow-2xl">
-      <div className="flex items-center justify-between mb-6">
+    <div className="bg-slate-800/50 backdrop-blur-sm rounded-2xl border border-slate-700/50 p-4 shadow-2xl h-full flex flex-col overflow-hidden">
+      <div className="flex items-center justify-between mb-3 flex-shrink-0">
         <div className="flex items-center gap-3">
-          <div className="w-1 h-8 bg-gradient-to-b from-blue-500 to-purple-500 rounded-full"></div>
-          <h2 className="text-2xl font-semibold text-white">Visualization</h2>
+          <div className="w-1 h-6 bg-gradient-to-b from-blue-500 to-purple-500 rounded-full"></div>
+          <h2 className="text-xl font-semibold text-white">Visualization</h2>
         </div>
       </div>
 
-      <div className="space-y-8">
+      <div className="flex-1 overflow-y-auto space-y-4 pr-2">
         {/* Steps per Hour Chart - Always 168 hours (7 days) */}
-        <div className="bg-slate-900/50 rounded-xl p-6 border border-slate-700/30">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-medium text-slate-200 flex items-center gap-2">
-              <span className="text-2xl">📊</span>
+        <div className="bg-slate-900/50 rounded-xl p-4 border border-slate-700/30 flex-shrink-0">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="text-base font-medium text-slate-200 flex items-center gap-2">
+              <span className="text-xl">📊</span>
               Steps per Hour (7 Days)
             </h3>
             <div className="flex items-center gap-2">
@@ -104,7 +104,7 @@ export function VisualizationPanel() {
               </select>
             </div>
           </div>
-          <ResponsiveContainer width="100%" height={300}>
+          <ResponsiveContainer width="100%" height={220}>
             <ComposedChart data={hourlyChartData}>
               <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
               <XAxis
@@ -148,10 +148,10 @@ export function VisualizationPanel() {
         </div>
 
         {/* Steps per Day Chart - Always 365 days (1 year) */}
-        <div className="bg-slate-900/50 rounded-xl p-6 border border-slate-700/30">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-medium text-slate-200 flex items-center gap-2">
-              <span className="text-2xl">📈</span>
+        <div className="bg-slate-900/50 rounded-xl p-4 border border-slate-700/30 flex-shrink-0">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="text-base font-medium text-slate-200 flex items-center gap-2">
+              <span className="text-xl">📈</span>
               Steps per Day (365 Days)
             </h3>
             <div className="flex items-center gap-2">
@@ -167,7 +167,7 @@ export function VisualizationPanel() {
               </select>
             </div>
           </div>
-          <ResponsiveContainer width="100%" height={300}>
+          <ResponsiveContainer width="100%" height={220}>
             <ComposedChart data={dailyChartData}>
               <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
               <XAxis
