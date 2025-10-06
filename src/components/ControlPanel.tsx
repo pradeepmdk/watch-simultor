@@ -4,6 +4,7 @@ import { useAppDispatch, useAppSelector } from 'energy/lib/hooks';
 import {
   startTimer,
   pauseTimer,
+  resetTimer,
   setSpeed as setSpeedAction,
   setStartDate as setStartDateAction,
   setDuration as setDurationAction,
@@ -55,6 +56,18 @@ export function ControlPanel() {
         type: 'NEW_STATE',
         message: `Simulation paused at speed x${speed}`,
         data: { action: 'pause', speed },
+      })
+    );
+  };
+
+  const handleReset = () => {
+    dispatch(resetTimer());
+    dispatch(
+      addEvent({
+        timestamp: new Date().toISOString(),
+        type: 'NEW_STATE',
+        message: 'Simulation reset - all data cleared',
+        data: { action: 'reset' },
       })
     );
   };
@@ -207,6 +220,17 @@ export function ControlPanel() {
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
           </svg>
           Save ({safeMinuteSteps.length})
+        </button>
+        <button
+          onClick={handleReset}
+          disabled={isRunning}
+          className="bg-red-600/80 hover:bg-red-600 border border-red-500 hover:border-red-400 text-white font-medium py-1.5 px-3 rounded transition-all duration-200 flex items-center justify-center gap-1.5 text-xs whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed"
+          title="Reset simulation and clear all data"
+        >
+          <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+          </svg>
+          Reset
         </button>
       </div>
 
