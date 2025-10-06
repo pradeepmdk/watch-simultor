@@ -11,6 +11,7 @@ import {
   addStepsToHour,
   addStepsToDay,
   addMinuteSteps,
+  pauseTimer,
 } from '../features/timerSlice';
 import { TimerEngine } from './TimerEngine';
 import { TimerEvent } from './types';
@@ -51,13 +52,10 @@ export function useTimer() {
       // Generate steps on each second (with state machine integration)
       if (event.type === 'NEW_SECOND' && stepGeneratorRef.current && timerEngineRef.current && stateMachineRef.current) {
         const currentTime = timerEngineRef.current.getCurrentTime();
-        const now = performance.now();
-        const realDeltaMs = now - lastUpdateTimeRef.current;
-        lastUpdateTimeRef.current = now;
-
-        // Calculate simulated delta based on speed
-        const speed = timerEngineRef.current.getSpeed();
-        const simulatedDeltaSeconds = (realDeltaMs / 1000) * speed;
+        
+        // Use fixed 1 second delta for step generation (simulated time, not real time)
+        // This ensures consistent step generation regardless of speed
+        const simulatedDeltaSeconds = 1;
 
         // Get current state multiplier
         const stateMultiplier = stateMachineRef.current.getStateMultiplier();
@@ -227,6 +225,19 @@ export function useTimer() {
     const progress = Math.min(100, (elapsedMs / totalMs) * 100);
 
     dispatch(setProgress(progress));
+
+    // Auto-stop when simulation completes
+    if (progress >= 100 && timerState.isRunning) {
+      dispatch(pauseTimer());
+      dispatch(
+        addEvent({
+          timestamp: currentTime.toISOString(),
+          type: 'NEW_STATE',
+          message: `Simulation completed - ${timerState.duration} days simulated`,
+          data: { action: 'auto_stop', duration: timerState.duration, progress: 100 },
+        })
+      );
+    }
   };
 
   return {
