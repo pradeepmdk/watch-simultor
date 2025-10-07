@@ -16,9 +16,11 @@ export class SimulationTimer {
     this.speed = speedMultiplier; // 1-1000
     this.isRunning = false;
     this.animationFrameId = null;
+    this.timeoutId = null;
     this.lastFrameTime = 0;
     this.realStartTime = 0;
     this.simulatedElapsedMs = 0;
+    this.frameIndex = 0; // Track frame count for high-speed optimization
 
     // Callback to notify device of time progression
     this.onTick = null;
@@ -52,6 +54,10 @@ export class SimulationTimer {
     if (this.animationFrameId !== null) {
       cancelAnimationFrame(this.animationFrameId);
       this.animationFrameId = null;
+    }
+    if (this.timeoutId !== null) {
+      clearTimeout(this.timeoutId);
+      this.timeoutId = null;
     }
   }
 
@@ -101,8 +107,9 @@ export class SimulationTimer {
   }
 
   /**
-   * Main tick loop using requestAnimationFrame
+   * Main tick loop with high-speed optimization
    * Converts wall time to simulated time based on speed
+   * Uses frame skipping and minimum delay for speeds >20x
    * @private
    */
   tick = () => {
@@ -116,13 +123,22 @@ export class SimulationTimer {
     const simulatedDeltaMs = realDeltaMs * this.speed;
     this.simulatedElapsedMs += simulatedDeltaMs;
 
+    // Increment frame index for high-speed tracking
+    this.frameIndex++;
+
     // Notify device about time progression
     if (this.onTick) {
       this.onTick(simulatedDeltaMs);
     }
 
-    // Schedule next tick
-    this.animationFrameId = requestAnimationFrame(this.tick);
+    // High-speed optimization: Use setTimeout with 5ms minimum delay for speeds >20x
+    // This prevents animation freeze while allowing fast simulation
+    if (this.speed > 20) {
+      this.timeoutId = setTimeout(this.tick, 5);
+    } else {
+      // For normal speeds (1x-20x), use requestAnimationFrame for smooth animation
+      this.animationFrameId = requestAnimationFrame(this.tick);
+    }
   };
 
   /**
@@ -133,6 +149,7 @@ export class SimulationTimer {
     this.simulatedElapsedMs = 0;
     this.lastFrameTime = 0;
     this.realStartTime = 0;
+    this.frameIndex = 0;
   }
 
   /**

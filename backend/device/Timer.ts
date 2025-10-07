@@ -15,6 +15,7 @@ export class Timer {
     this.currentTime = new Date(startDate);
     this.lastSecond = this.currentTime.getSeconds();
     this.lastMinute = this.currentTime.getMinutes();
+    this.accumulatedMs = 0; // Track accumulated milliseconds for 100ms chunks
     this.listeners = new Map([
       ['NEW_SECOND', new Set()],
       ['NEW_MINUTE', new Set()],
@@ -24,36 +25,46 @@ export class Timer {
   /**
    * Advance device time by specified milliseconds
    * Called by SimulationTimer based on speed multiplier
+   * Processes time in consistent 100ms chunks
    *
    * @param {number} deltaMs - Milliseconds to advance (simulated time)
    */
   tick(deltaMs) {
-    // Update current device time
-    const newTime = this.currentTime.getTime() + deltaMs;
-    this.currentTime = new Date(newTime);
+    // Accumulate incoming time delta
+    this.accumulatedMs += deltaMs;
 
-    // Check for second boundary crossing
-    const currentSecond = this.currentTime.getSeconds();
-    if (currentSecond !== this.lastSecond) {
-      this.emitEvent({
-        type: 'NEW_SECOND',
-        timestamp: Date.now(), // Wall time
-        simulatedTime: new Date(this.currentTime), // Device time
-        data: { second: currentSecond }
-      });
-      this.lastSecond = currentSecond;
-    }
+    // Process in 100ms chunks to maintain consistent device behavior
+    const TICK_INTERVAL_MS = 100;
 
-    // Check for minute boundary crossing
-    const currentMinute = this.currentTime.getMinutes();
-    if (currentMinute !== this.lastMinute) {
-      this.emitEvent({
-        type: 'NEW_MINUTE',
-        timestamp: Date.now(), // Wall time
-        simulatedTime: new Date(this.currentTime), // Device time
-        data: { minute: currentMinute }
-      });
-      this.lastMinute = currentMinute;
+    while (this.accumulatedMs >= TICK_INTERVAL_MS) {
+      // Advance device time by exactly 100ms
+      const newTime = this.currentTime.getTime() + TICK_INTERVAL_MS;
+      this.currentTime = new Date(newTime);
+      this.accumulatedMs -= TICK_INTERVAL_MS;
+
+      // Check for second boundary crossing
+      const currentSecond = this.currentTime.getSeconds();
+      if (currentSecond !== this.lastSecond) {
+        this.emitEvent({
+          type: 'NEW_SECOND',
+          timestamp: Date.now(), // Wall time
+          simulatedTime: new Date(this.currentTime), // Device time
+          data: { second: currentSecond }
+        });
+        this.lastSecond = currentSecond;
+      }
+
+      // Check for minute boundary crossing
+      const currentMinute = this.currentTime.getMinutes();
+      if (currentMinute !== this.lastMinute) {
+        this.emitEvent({
+          type: 'NEW_MINUTE',
+          timestamp: Date.now(), // Wall time
+          simulatedTime: new Date(this.currentTime), // Device time
+          data: { minute: currentMinute }
+        });
+        this.lastMinute = currentMinute;
+      }
     }
   }
 
@@ -98,6 +109,7 @@ export class Timer {
     this.currentTime = new Date(startDate);
     this.lastSecond = this.currentTime.getSeconds();
     this.lastMinute = this.currentTime.getMinutes();
+    this.accumulatedMs = 0;
   }
 
   /**
