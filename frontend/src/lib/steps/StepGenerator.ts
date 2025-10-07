@@ -63,10 +63,12 @@ export class StepGenerator {
     // Calculate awake hours
     const activities: ActivityBlock[] = [];
 
-    // Determine if we should have walks today (based on weekly frequency)
-    const shouldWalk = Math.random() < (this.archetype.walks.frequencyPerWeek / 7);
+    // Schedule walks (should happen every day for frequency 7/week, or probabilistically for less)
+    const walkProbability = this.archetype.walks.frequencyPerWeek / 7;
+    const shouldWalk = walkProbability >= 1.0 || Math.random() < walkProbability;
+
     if (shouldWalk) {
-      // Schedule walks randomly during awake hours
+      // Schedule 1-3 walks randomly during awake hours
       const numWalks = 1 + Math.floor(Math.random() * 3); // 1-3 walks per day
       for (let i = 0; i < numWalks; i++) {
         const walkTime = this.getRandomAwakeTime(wakeHour, sleepHour);
@@ -224,7 +226,18 @@ export class StepGenerator {
 
       console.log(`📅 New day planned: ${dateStr}`);
       console.log(`  Sleep: ${this.currentPlan.sleepHour}:00, Wake: ${this.currentPlan.wakeHour}:00`);
-      console.log(`  Activities: ${this.currentPlan.activities.length} (${this.currentPlan.activities.map(a => a.type).join(', ')})`);
+      console.log(`  Activities: ${this.currentPlan.activities.length}`);
+      if (this.currentPlan.activities.length > 0) {
+        console.log(`  Activity details:`, this.currentPlan.activities.map(a =>
+          `${a.type} at ${a.startHour}:${String(a.startMinute).padStart(2, '0')} for ${a.durationMinutes}min (${a.stepsPerMinute} spm)`
+        ));
+      }
+    }
+
+    // If no plan yet, can't calculate steps
+    if (!this.currentPlan) {
+      console.log('⚠️ No daily plan yet, returning null');
+      return null;
     }
 
     // Reset minute counter
@@ -234,7 +247,12 @@ export class StepGenerator {
     }
 
     // Check if sleeping
-    if (this.isSleeping(hour, this.currentPlan!.sleepHour, this.currentPlan!.wakeHour)) {
+    const sleeping = this.isSleeping(hour, this.currentPlan.sleepHour, this.currentPlan.wakeHour);
+    if (sleeping) {
+      // Log only once per hour during sleep
+      if (minute === 0) {
+        console.log(`😴 Sleeping at ${hour}:${String(minute).padStart(2, '0')}`);
+      }
       return null; // Zero steps during sleep
     }
 
@@ -242,6 +260,11 @@ export class StepGenerator {
     const activity = this.getActiveActivity(hour, minute);
 
     if (activity) {
+      // Log activity start once
+      if (minute === activity.startMinute && deltaSeconds < 5) {
+        console.log(`🏃 ${activity.type.toUpperCase()} started at ${hour}:${String(minute).padStart(2, '0')} - ${activity.stepsPerMinute} spm for ${activity.durationMinutes}min`);
+      }
+
       // Generate steps for walk or run
       const stepsPerSecond = activity.stepsPerMinute / 60;
       this.accumulatedSteps += stepsPerSecond * deltaSeconds;
@@ -263,6 +286,7 @@ export class StepGenerator {
       }
     }
 
+    // During awake hours with no activity, return null (idle = no steps)
     return null;
   }
 
