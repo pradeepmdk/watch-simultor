@@ -26,7 +26,7 @@ interface DailyPlan {
   activities: ActivityBlock[]; // Scheduled walks and runs
 }
 
-export class StepGenerator {
+export class NewStepGenerator {
   private archetype: NewArchetypeConfig;
   private currentPlan: DailyPlan | null = null;
   private lastDate: string = '';
@@ -214,6 +214,11 @@ export class StepGenerator {
     const dateStr = this.formatDate(currentTime);
     const hour = currentTime.getHours();
     const minute = currentTime.getMinutes();
+
+    // DEBUG: Log every call
+    if (Math.random() < 0.001) { // Log ~0.1% of calls to avoid spam
+      console.log(`DEBUG calculateSteps called: ${dateStr} ${hour}:${minute}, lastDate=${this.lastDate}`);
+    }
 
     // Check if we need to plan a new day
     if (dateStr !== this.lastDate) {

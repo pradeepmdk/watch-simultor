@@ -7,13 +7,12 @@
  * - Modulates step generation based on device state
  */
 
-import { StepGenerator } from '../../src/lib/steps/StepGenerator';
-import { StateMachine } from '../../src/lib/state/StateMachine';
-import { getActivityForHour } from '../../src/lib/steps/archetypes';
+import { NewStepGenerator } from '../steps/NewStepGenerator';
+import { StateMachine } from '../../frontend/src/lib/state/StateMachine';
 
 export class Sensor {
   constructor(archetype = 'office') {
-    this.stepGenerator = new StepGenerator(archetype);
+    this.stepGenerator = new NewStepGenerator(archetype);
     this.stateMachine = new StateMachine('IDLE');
     this.stepsInLastMinute = 0;
     this.lastMinute = -1;
@@ -29,17 +28,8 @@ export class Sensor {
    * @param {number} deltaSeconds - Simulated time delta (typically 1 second)
    */
   processTick(currentTime, deltaSeconds) {
-    // Get current state multiplier
-    const stateMultiplier = this.stateMachine.getStateMultiplier();
-    const deviceState = this.stateMachine.getCurrentState();
-
-    // Calculate steps for this tick
-    const stepData = this.stepGenerator.calculateSteps(
-      currentTime,
-      deltaSeconds,
-      stateMultiplier,
-      deviceState
-    );
+    // Calculate steps for this tick using new generator
+    const stepData = this.stepGenerator.calculateSteps(currentTime, deltaSeconds);
 
     if (stepData) {
       // Track steps for state machine
@@ -50,7 +40,10 @@ export class Sensor {
         type: 'NEW_STEP',
         timestamp: Date.now(),
         simulatedTime: new Date(currentTime),
-        data: stepData
+        data: {
+          ...stepData,
+          deviceState: this.stateMachine.getCurrentState(),
+        }
       });
     }
 
@@ -69,8 +62,14 @@ export class Sensor {
    */
   updateStateMachine(currentTime) {
     const hour = currentTime.getHours();
-    const archetype = this.stepGenerator.getArchetype();
-    const activity = getActivityForHour(archetype, hour);
+    const plan = this.stepGenerator.getCurrentPlan();
+
+    // Determine activity level based on sleep/wake status
+    let activityLevel = 'sedentary';
+    if (plan) {
+      const isSleeping = this.isSleeping(hour, plan.sleepHour, plan.wakeHour);
+      activityLevel = isSleeping ? 'sleep' : (this.stepsInLastMinute > 50 ? 'moderate' : 'sedentary');
+    }
 
     // Build state context
     const context = {
@@ -79,7 +78,7 @@ export class Sensor {
       isNight: hour >= 22 || hour < 6,
       stepsInLastMinute: this.stepsInLastMinute,
       totalSteps: this.stepGenerator.getTotalSteps(),
-      activityLevel: activity.level,
+      activityLevel: activityLevel,
       minutesSinceLastActivity: 0, // Calculated by state machine
     };
 
@@ -99,6 +98,20 @@ export class Sensor {
           timestamp: stateTransition.timestamp.toISOString(),
         }
       });
+    }
+  }
+
+  /**
+   * Check if currently in sleep period
+   * @private
+   */
+  isSleeping(hour, sleepHour, wakeHour) {
+    if (sleepHour < wakeHour) {
+      // Normal case: sleep 0-8, awake 8-24
+      return hour >= sleepHour && hour < wakeHour;
+    } else {
+      // Night shift: sleep 9-17, awake 17-9
+      return hour >= sleepHour || hour < wakeHour;
     }
   }
 
@@ -135,19 +148,11 @@ export class Sensor {
   }
 
   /**
-   * Get hourly step distribution for visualization
-   * @returns {Array} Array of {hour, steps} objects
+   * Get current daily plan (for debugging)
+   * @returns {Object} Current daily plan
    */
-  getHourlyDistribution() {
-    return this.stepGenerator.getHourlyDistribution();
-  }
-
-  /**
-   * Get expected daily steps
-   * @returns {number} Expected daily steps
-   */
-  getExpectedDailySteps() {
-    return this.stepGenerator.getExpectedDailySteps();
+  getCurrentPlan() {
+    return this.stepGenerator.getCurrentPlan();
   }
 
   /**

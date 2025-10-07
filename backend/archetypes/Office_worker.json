@@ -1,0 +1,28 @@
+{
+  "id": "office_worker",
+  "name": "Office Worker",
+  "description": "Regular office schedule with randomized sleep/wake times",
+  "sleepTime": {
+    "hour": 0,
+    "randomizationMinutes": 60,
+    "step": 60
+  },
+  "wakeTime": {
+    "hour": 8,
+    "randomizationMinutes": 60,
+    "step": 60
+  },
+  "walks": {
+    "stepsPerMinute": 110,
+    "dispersion": 10,
+    "durationMinutes": 10,
+    "frequencyPerWeek": 7
+  },
+  "runs": {
+    "stepsPerMinute": 150,
+    "dispersion": 15,
+    "durationMinutes": 10,
+    "frequencyPerWeek": 3
+  },
+  "sleepStepsPerHour": 0
+}
