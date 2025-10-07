@@ -37,7 +37,7 @@ export function ControlPanel() {
     const month = String(now.getMonth() + 1).padStart(2, '0');
     const day = String(now.getDate()).padStart(2, '0');
     const uuid = Math.random().toString(36).substring(2, 6).toUpperCase();
-    const filename = `${year}-${month}-${day}_${speed}x_${uuid}.json`;
+    const filename = `${year}-${month}-${day}_${speed}x_${uuid}.csv`;
     dispatch(setExportFilename(filename));
     
     dispatch(startTimer());
