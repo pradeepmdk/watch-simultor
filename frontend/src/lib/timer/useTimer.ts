@@ -18,7 +18,7 @@ import { TimerEvent } from './types';
 import { StepGenerator } from '../steps/StepGenerator';
 import { StateMachine } from '../state/StateMachine';
 import { StateContext } from '../state/types';
-import { getActivityForHour } from '../steps/archetypes';
+import { getActivityForHour } from '../steps/archetypes_new';
 
 export function useTimer() {
   const dispatch = useAppDispatch();

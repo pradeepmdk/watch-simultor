@@ -94,3 +94,23 @@ export const NEW_ARCHETYPES: Record<string, NewArchetypeConfig> = {
 export function getNewArchetype(id: string): NewArchetypeConfig {
   return NEW_ARCHETYPES[id] || NEW_ARCHETYPES.office;
 }
+
+/**
+ * Get activity level for a specific hour (compatibility with old archetype system)
+ * This is needed by useTimer.ts which expects the old schedule format
+ */
+export function getActivityForHour(archetype: NewArchetypeConfig, hour: number): { level: number } {
+  // During sleep hours, activity level is 0
+  const isSleeping =
+    archetype.sleepTime.hour < archetype.wakeTime.hour
+      ? (hour >= archetype.sleepTime.hour && hour < archetype.wakeTime.hour)
+      : (hour >= archetype.sleepTime.hour || hour < archetype.wakeTime.hour);
+
+  if (isSleeping) {
+    return { level: 0 }; // SLEEPING
+  }
+
+  // During awake hours, default to idle (level 1)
+  // The actual walk/run activities are handled by StepGenerator's daily planning
+  return { level: 1 }; // IDLE
+}
