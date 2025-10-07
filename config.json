@@ -1,0 +1,36 @@
+{
+  "simulation": {
+    "startDate": "2024-10-07T00:00:00.000Z",
+    "duration": 7,
+    "speed": 1,
+    "archetype": "office",
+    "autoStop": true
+  },
+  "device": {
+    "tickIntervalMs": 100,
+    "enableSensors": true
+  },
+  "archetypes": {
+    "office": {
+      "name": "Office Worker",
+      "description": "Desk job with regular breaks and lunch walk"
+    },
+    "gym": {
+      "name": "Gym Enthusiast",
+      "description": "Regular morning/evening workout sessions"
+    },
+    "flexible": {
+      "name": "Flexible Worker",
+      "description": "Work-from-home with irregular activity"
+    },
+    "shift": {
+      "name": "Shift Worker",
+      "description": "Night shift worker with adjusted sleep schedule"
+    }
+  },
+  "ui": {
+    "eventLogLimit": 100,
+    "chartUpdateInterval": 1000,
+    "compactView": false
+  }
+}
