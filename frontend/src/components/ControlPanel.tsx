@@ -78,7 +78,7 @@ export function ControlPanel() {
   const safeProgress = Number.isFinite(progress) ? Math.min(Math.max(progress, 0), 100) : 0;
   const progressLabel = `${safeProgress.toFixed(2)}%`;
   const safeMinuteSteps = minuteSteps || [];
-  const safeExportFilename = exportFilename || 'simulation.json';
+  const safeExportFilename = exportFilename || 'simulation.csv';
 
   const handleSaveJSON = () => {
     // Format: YYYY-MM-DD HH:MM:SS, N_steps
@@ -210,7 +210,7 @@ export function ControlPanel() {
           type="text"
           value={safeExportFilename}
           onChange={(e) => dispatch(setExportFilename(e.target.value))}
-          placeholder="filename.json"
+          placeholder="filename.csv"
           className="flex-1 bg-slate-700/50 border border-slate-600 rounded px-2 py-1.5 text-xs text-slate-200 focus:outline-none focus:ring-1 focus:ring-blue-500"
         />
         <button
