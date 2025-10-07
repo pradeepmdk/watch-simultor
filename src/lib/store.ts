@@ -1,5 +1,4 @@
 import { configureStore } from '@reduxjs/toolkit';
-import counterReducer from './features/counterSlice';
 import timerReducer from './features/timerSlice';
 import { loadState, saveState } from './localStorage';
 
@@ -7,12 +6,14 @@ export const makeStore = () => {
   // Load persisted state from localStorage
   const persistedState = loadState();
 
+  // Type assertion needed due to Redux Toolkit's strict typing with partial preloadedState
+  // See: https://github.com/reduxjs/redux-toolkit/issues/1806
   const store = configureStore({
     reducer: {
-      counter: counterReducer,
+      // @ts-expect-error - Redux Toolkit has issues with partial preloadedState typing
       timer: timerReducer,
     },
-    ...(persistedState && { preloadedState: persistedState }),
+    ...(persistedState ? { preloadedState: persistedState } : {}),
   });
 
   // Subscribe to store changes and save to localStorage with debouncing
@@ -26,7 +27,6 @@ export const makeStore = () => {
     timeoutId = setTimeout(() => {
       const state = store.getState();
       saveState({
-        counter: state.counter,
         timer: {
           ...state.timer,
           // Don't persist runtime state

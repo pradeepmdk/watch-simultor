@@ -173,10 +173,10 @@ export function ControlPanel() {
             disabled={isRunning}
             className="flex-1 bg-slate-700/50 border border-slate-600 rounded px-2 py-1 text-xs text-slate-200 focus:outline-none focus:ring-1 focus:ring-blue-500 appearance-none cursor-pointer disabled:opacity-50"
           >
-            <option value="office">Office</option>
+            <option value="office">Office Worker</option>
+            <option value="flexible">Flexible Worker</option>
+            <option value="shift">Shift Worker</option>
             <option value="athlete">Athlete</option>
-            <option value="sedentary">Sedentary</option>
-            <option value="active">Active</option>
           </select>
         </div>
         

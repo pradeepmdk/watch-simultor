@@ -240,12 +240,116 @@ const ACTIVE: ArchetypeDefinition = {
   ],
 };
 
+/**
+ * Flexible Worker Archetype
+ * - Works from home with flexible schedule
+ * - Irregular activity patterns throughout the day
+ * - Activity spread across different times
+ */
+const FLEXIBLE_WORKER: ArchetypeDefinition = {
+  id: 'flexible',
+  name: 'Flexible Worker',
+  description: 'Work from home with flexible hours',
+  dailyStepGoal: 7000,
+  schedule: [
+    // Night: 0-6 (Sleep)
+    { hour: 0, level: 'sleep', type: 'walking', probability: 0 },
+    { hour: 1, level: 'sleep', type: 'walking', probability: 0 },
+    { hour: 2, level: 'sleep', type: 'walking', probability: 0 },
+    { hour: 3, level: 'sleep', type: 'walking', probability: 0 },
+    { hour: 4, level: 'sleep', type: 'walking', probability: 0 },
+    { hour: 5, level: 'sleep', type: 'walking', probability: 0 },
+
+    // Late morning start: 6-9
+    { hour: 6, level: 'sedentary', type: 'walking', probability: 0.3 },
+    { hour: 7, level: 'light', type: 'walking', probability: 0.5 },
+    { hour: 8, level: 'moderate', type: 'walking', probability: 0.6 }, // Morning activity
+    { hour: 9, level: 'light', type: 'walking', probability: 0.4 },
+
+    // Mid-morning work: 10-12
+    { hour: 10, level: 'sedentary', type: 'walking', probability: 0.3 },
+    { hour: 11, level: 'light', type: 'walking', probability: 0.4 }, // Coffee break
+
+    // Lunch break: 12-14 (flexible timing)
+    { hour: 12, level: 'light', type: 'walking', probability: 0.5 },
+    { hour: 13, level: 'moderate', type: 'walking', probability: 0.6 }, // Lunch walk
+
+    // Afternoon: 14-17 (work from home)
+    { hour: 14, level: 'sedentary', type: 'walking', probability: 0.3 },
+    { hour: 15, level: 'light', type: 'walking', probability: 0.4 }, // Afternoon break
+    { hour: 16, level: 'moderate', type: 'walking', probability: 0.5 }, // Mid-afternoon walk
+    { hour: 17, level: 'light', type: 'walking', probability: 0.4 },
+
+    // Evening: 18-21 (higher activity)
+    { hour: 18, level: 'moderate', type: 'walking', probability: 0.7 }, // Evening walk
+    { hour: 19, level: 'moderate', type: 'walking', probability: 0.6 },
+    { hour: 20, level: 'light', type: 'walking', probability: 0.5 },
+    { hour: 21, level: 'light', type: 'walking', probability: 0.4 },
+
+    // Wind down: 22-23
+    { hour: 22, level: 'sedentary', type: 'walking', probability: 0.2 },
+    { hour: 23, level: 'sedentary', type: 'walking', probability: 0.1 },
+  ],
+};
+
+/**
+ * Shift Worker Archetype
+ * - Works irregular shifts (night shifts, rotating schedule)
+ * - Sleep during day, active at night
+ * - Activity patterns inverted from typical schedule
+ */
+const SHIFT_WORKER: ArchetypeDefinition = {
+  id: 'shift',
+  name: 'Shift Worker',
+  description: 'Night shift worker with inverted schedule',
+  dailyStepGoal: 6500,
+  schedule: [
+    // Night shift work: 0-7 (active during night)
+    { hour: 0, level: 'moderate', type: 'walking', probability: 0.5 }, // Night shift activity
+    { hour: 1, level: 'light', type: 'walking', probability: 0.4 },
+    { hour: 2, level: 'moderate', type: 'walking', probability: 0.5 },
+    { hour: 3, level: 'light', type: 'walking', probability: 0.4 }, // Night break
+    { hour: 4, level: 'moderate', type: 'walking', probability: 0.5 },
+    { hour: 5, level: 'light', type: 'walking', probability: 0.4 },
+    { hour: 6, level: 'moderate', type: 'walking', probability: 0.5 },
+
+    // Morning commute home: 7-8
+    { hour: 7, level: 'moderate', type: 'walking', probability: 0.6 }, // Commute home
+
+    // Day sleep: 8-15
+    { hour: 8, level: 'sleep', type: 'walking', probability: 0 },
+    { hour: 9, level: 'sleep', type: 'walking', probability: 0 },
+    { hour: 10, level: 'sleep', type: 'walking', probability: 0 },
+    { hour: 11, level: 'sleep', type: 'walking', probability: 0 },
+    { hour: 12, level: 'sleep', type: 'walking', probability: 0 },
+    { hour: 13, level: 'sleep', type: 'walking', probability: 0 },
+    { hour: 14, level: 'sleep', type: 'walking', probability: 0 },
+
+    // Wake up and evening routine: 15-18
+    { hour: 15, level: 'sedentary', type: 'walking', probability: 0.3 },
+    { hour: 16, level: 'light', type: 'walking', probability: 0.5 }, // Afternoon wake-up
+    { hour: 17, level: 'moderate', type: 'walking', probability: 0.6 }, // Errands/exercise
+    { hour: 18, level: 'moderate', type: 'walking', probability: 0.6 },
+
+    // Pre-shift routine: 19-22
+    { hour: 19, level: 'moderate', type: 'walking', probability: 0.6 }, // Meal prep/activities
+    { hour: 20, level: 'light', type: 'walking', probability: 0.5 },
+    { hour: 21, level: 'light', type: 'walking', probability: 0.4 },
+
+    // Preparing for shift: 22-23
+    { hour: 22, level: 'moderate', type: 'walking', probability: 0.6 }, // Commute to work
+    { hour: 23, level: 'moderate', type: 'walking', probability: 0.5 }, // Start of shift
+  ],
+};
+
 // Export all archetypes
 export const ARCHETYPES: Record<string, ArchetypeDefinition> = {
   office: OFFICE_WORKER,
   athlete: ATHLETE,
   sedentary: SEDENTARY,
   active: ACTIVE,
+  flexible: FLEXIBLE_WORKER,
+  shift: SHIFT_WORKER,
 };
 
 // Helper function to get archetype by ID

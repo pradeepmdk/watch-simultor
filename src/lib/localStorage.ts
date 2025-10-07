@@ -2,12 +2,12 @@
  * Local Storage utility functions for Redux state persistence
  */
 
+// Import the timer state type
+import { TimerState } from './features/timerSlice';
+
 // Type for the persisted state
-export type RootState = {
-  counter: {
-    value: number;
-  };
-  // Add more slices here as needed
+export type PersistedState = {
+  timer: TimerState;
 };
 
 const STORAGE_KEY = 'redux_state';
@@ -15,7 +15,7 @@ const STORAGE_KEY = 'redux_state';
 /**
  * Load state from localStorage
  */
-export const loadState = (): Partial<RootState> | undefined => {
+export const loadState = (): Partial<PersistedState> | undefined => {
   try {
     // Check if we're in the browser
     if (typeof window === 'undefined') {
@@ -36,7 +36,7 @@ export const loadState = (): Partial<RootState> | undefined => {
 /**
  * Save state to localStorage
  */
-export const saveState = (state: Partial<RootState>): void => {
+export const saveState = (state: Partial<PersistedState>): void => {
   try {
     // Check if we're in the browser
     if (typeof window === 'undefined') {
